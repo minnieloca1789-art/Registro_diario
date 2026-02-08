@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Registro Diario de Alimentos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        input[type="date"],
+        input[type="time"],
+        input[type="text"],
+        textarea {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-add {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-export {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-export:hover {
+            background: #138496;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(23, 162, 184, 0.3);
+        }
+
+        .btn-clear {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .table-section {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        thead {
+            background: #667eea;
+            color: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85em;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .no-records {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+
+        .stats {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.85em;
+            }
+
+            th, td {
+                padding: 8px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Registro Diario de Alimentos</h1>
+
+        <!-- Formulario de registro -->
+        <div class="form-section">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="fecha">📅 Fecha</label>
+                    <input type="date" id="fecha" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="horario">🕒 Horario</label>
+                    <input type="time" id="horario" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="alimento">🍽️ Alimento</label>
+                    <input type="text" id="alimento" placeholder="Ej: Manzana" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="cantidad">Cantidad / Medida</label>
+                    <input type="text" id="cantidad" placeholder="Ej: 1 unidad, 200g" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="observaciones">Observaciones</label>
+                    <textarea id="observaciones" placeholder="Notas adicionales (opcional)"></textarea>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-add" onclick="agregarRegistro()">➕ Agregar Registro</button>
+                <button class="btn-export" onclick="exportarAExcel()">📥 Exportar a Excel (CSV)</button>
+                <button class="btn-clear" onclick="borrarTodo()">🗑️ Borrar Todo</button>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats">
+            Total de registros: <span id="totalRegistros">0</span>
+        </div>
+
+        <!-- Tabla de registros -->
+        <div class="table-section">
+            <table id="tablaRegistros">
+                <thead>
+                    <tr>
+                        <th>📅 Fecha</th>
+                        <th>🕒 Horario</th>
+                        <th>🍽️ Alimento</th>
+                        <th>Cantidad</th>
+                        <th>Observaciones</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTabla">
+                    <!-- Los registros se insertarán aquí dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Array para almacenar los registros
+        let registros = [];
+
+        // Cargar registros desde LocalStorage al iniciar la página
+        window.onload = function() {
+            cargarRegistros();
+            establecerFechaActual();
+        };
+
+        // Establecer la fecha actual por defecto
+        function establecerFechaActual() {
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha').value = hoy;
+            
+            const ahora = new Date();
+            const horaActual = ahora.getHours().toString().padStart(2, '0') + ':' + 
+                              ahora.getMinutes().toString().padStart(2, '0');
+            document.getElementById('horario').value = horaActual;
+        }
+
+        // Función para agregar un nuevo registro
+        function agregarRegistro() {
+            // Obtener valores del formulario
+            const fecha = document.getElementById('fecha').value;
+            const horario = document.getElementById('horario').value;
+            const alimento = document.getElementById('alimento').value.trim();
+            const cantidad = document.getElementById('cantidad').value.trim();
+            const observaciones = document.getElementById('observaciones').value.trim();
+
+            // Validar campos obligatorios
+            if (!fecha || !horario || !alimento || !cantidad) {
+                alert('⚠️ Por favor, completa todos los campos obligatorios (Fecha, Horario, Alimento y Cantidad)');
+                return;
+            }
+
+            // Crear objeto de registro
+            const registro = {
+                id: Date.now(), // ID único basado en timestamp
+                fecha: fecha,
+                horario: horario,
+                alimento: alimento,
+                cantidad: cantidad,
+                observaciones: observaciones
+            };
+
+            // Agregar al array de registros
+            registros.push(registro);
+
+            // Guardar en LocalStorage
+            guardarEnLocalStorage();
+
+            // Actualizar la tabla
+            actualizarTabla();
+
+            // Limpiar el formulario
+            limpiarFormulario();
+
+            // Mensaje de confirmación
+            console.log('✅ Registro agregado exitosamente');
+        }
+
+        // Función para guardar en LocalStorage
+        function guardarEnLocalStorage() {
+            localStorage.setItem('registrosAlimentos', JSON.stringify(registros));
+        }
+
+        // Función para cargar desde LocalStorage
+        function cargarRegistros() {
+            const datosGuardados = localStorage.getItem('registrosAlimentos');
+            if (datosGuardados) {
+                registros = JSON.parse(datosGuardados);
+                actualizarTabla();
+            }
+        }
+
+        // Función para actualizar la tabla
+        function actualizarTabla() {
+            const cuerpoTabla = document.getElementById('cuerpoTabla');
+            cuerpoTabla.innerHTML = '';
+
+            if (registros.length === 0) {
+                cuerpoTabla.innerHTML = '<tr><td colspan="6" class="no-records">No hay registros. ¡Agrega tu primer alimento!</td></tr>';
+            } else {
+                // Ordenar por fecha y hora (más reciente primero)
+                const registrosOrdenados = [...registros].sort((a, b) => {
+                    const fechaHoraA = new Date(a.fecha + ' ' + a.horario);
+                    const fechaHoraB = new Date(b.fecha + ' ' + b.horario);
+                    return fechaHoraB - fechaHoraA;
+                });
+
+                registrosOrdenados.forEach(registro => {
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${formatearFecha(registro.fecha)}</td>
+                        <td>${registro.horario}</td>
+                        <td><strong>${registro.alimento}</strong></td>
+                        <td>${registro.cantidad}</td>
+                        <td>${registro.observaciones || '-'}</td>
+                        <td>
+                            <button class="btn-delete" onclick="eliminarRegistro(${registro.id})">🗑️ Eliminar</button>
+                        </td>
+                    `;
+                    cuerpoTabla.appendChild(fila);
+                });
+            }
+
+            // Actualizar contador
+            document.getElementById('totalRegistros').textContent = registros.length;
+        }
+
+        // Función para formatear fecha
+        function formatearFecha(fecha) {
+            const [anio, mes, dia] = fecha.split('-');
+            return `${dia}/${mes}/${anio}`;
+        }
+
+        // Función para eliminar un registro
+        function eliminarRegistro(id) {
+            if (confirm('¿Estás seguro de que deseas eliminar este registro?')) {
+                registros = registros.filter(registro => registro.id !== id);
+                guardarEnLocalStorage();
+                actualizarTabla();
+            }
+        }
+
+        // Función para borrar todos los registros
+        function borrarTodo() {
+            if (confirm('⚠️ ¿Estás seguro de que deseas eliminar TODOS los registros? Esta acción no se puede deshacer.')) {
+                if (confirm('🔴 ÚLTIMA CONFIRMACIÓN: Se borrarán ' + registros.length + ' registro(s). ¿Continuar?')) {
+                    registros = [];
+                    guardarEnLocalStorage();
+                    actualizarTabla();
+                    alert('✅ Todos los registros han sido eliminados.');
+                }
+            }
+        }
+
+        // Función para limpiar el formulario
+        function limpiarFormulario() {
+            document.getElementById('alimento').value = '';
+            document.getElementById('cantidad').value = '';
+            document.getElementById('observaciones').value = '';
+            establecerFechaActual(); // Restablecer fecha y hora actual
+            document.getElementById('alimento').focus(); // Enfocar en el campo de alimento
+        }
+
+        // Función para exportar a CSV (compatible con Excel)
+        function exportarAExcel() {
+            if (registros.length === 0) {
+                alert('⚠️ No hay registros para exportar.');
+                return;
+            }
+
+            // Ordenar por fecha y hora
+            const registrosOrdenados = [...registros].sort((a, b) => {
+                const fechaHoraA = new Date(a.fecha + ' ' + a.horario);
+                const fechaHoraB = new Date(b.fecha + ' ' + b.horario);
+                return fechaHoraA - fechaHoraB;
+            });
+
+            // Crear el contenido CSV
+            let csv = '\ufeff'; // BOM para UTF-8 (para caracteres especiales en Excel)
+            csv += 'Fecha,Horario,Alimento,Cantidad,Observaciones\n';
+
+            registrosOrdenados.forEach(registro => {
+                // Escapar comillas y comas en los datos
+                const alimento = escaparCSV(registro.alimento);
+                const cantidad = escaparCSV(registro.cantidad);
+                const observaciones = escaparCSV(registro.observaciones);
+                
+                csv += `${formatearFecha(registro.fecha)},${registro.horario},${alimento},${cantidad},${observaciones}\n`;
+            });
+
+            // Crear un blob con el contenido CSV
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+
+            // Crear un enlace de descarga
+            const enlace = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            enlace.setAttribute('href', url);
+            enlace.setAttribute('download', 'registro_alimentos_' + new Date().toISOString().split('T')[0] + '.csv');
+            enlace.style.visibility = 'hidden';
+            
+            document.body.appendChild(enlace);
+            enlace.click();
+            document.body.removeChild(enlace);
+
+            alert('✅ Archivo CSV exportado exitosamente. Ábrelo con Excel para ver tus registros.');
+        }
+
+        // Función para escapar caracteres especiales en CSV
+        function escaparCSV(texto) {
+            if (!texto) return '';
+            // Si contiene comas, comillas o saltos de línea, encerrar entre comillas
+            if (texto.includes(',') || texto.includes('"') || texto.includes('\n')) {
+                // Duplicar las comillas internas
+                texto = texto.replace(/"/g, '""');
+                return '"' + texto + '"';
+            }
+            return texto;
+        }
+
+        // Permitir agregar registro con Enter (excepto en textarea)
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                agregarRegistro();
+            }
+        });
+    </script>
+</body>
+</html>
